@@ -1,0 +1,8 @@
+do_dai_ma = 15
+so_bit_thong_tin = 11
+h(x) = x^11+x^8+x^7+x^5+x^3+x^2+x+1
+g(x) = x^4+x+1
+khoang_cach_ma_toi_thieu = 3
+so_loi_phat_hien_duoc = 2
+so_loi_sua_duoc = 1
+tu_ma_co_trong_so_nho_nhat = 000000000010011
