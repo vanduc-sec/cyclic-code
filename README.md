@@ -23,7 +23,7 @@ Yêu cầu:
 
 ## 3. Cấu trúc thư mục
 
-text
+```text
 .
 ├── main.cpp
 ├── README.md
