@@ -16,223 +16,272 @@ const int mod = 1e9 + 7;
 const int inf = 1e9;
 const ll linf = 4e18;
 
-struct bit{
-    int v;
-    bit(int x = 0){
-        v = x & 1;
+struct bitnhiphan{
+    int gia_tri;
+
+    bitnhiphan(int x = 0){
+        gia_tri = x & 1;
     }
-    bit operator+(const bit &o) const{
-        return bit(v ^ o.v);
+
+    bitnhiphan operator+(const bitnhiphan &khac) const{
+        return bitnhiphan(gia_tri ^ khac.gia_tri);
     }
-    bit operator*(const bit &o) const{
-        return bit(v & o.v);
+
+    bitnhiphan operator*(const bitnhiphan &khac) const{
+        return bitnhiphan(gia_tri & khac.gia_tri);
     }
 };
 
-struct binvec{
-    vector<bit> a;
-    binvec(){}
-    binvec(int n){
-        a.assign(n, bit(0));
+struct vectonhiphan{
+    vector<bitnhiphan> a;
+
+    vectonhiphan(){}
+
+    vectonhiphan(int n){
+        a.assign(n, bitnhiphan(0));
     }
-    int size() const{
+
+    int kich_thuoc() const{
         return (int)a.size();
     }
-    int weight() const{
-        int s = 0;
-        for(auto x : a) s += x.v;
-        return s;
+
+    int trong_so() const{
+        int tong = 0;
+        for(auto x : a) tong += x.gia_tri;
+        return tong;
     }
-    string str() const{
+
+    string dang_chuoi() const{
         string s;
-        for(int i = size() - 1; i >= 0; i--) s += char('0' + a[i].v);
+        for(int i = kich_thuoc() - 1; i >= 0; i--){
+            s += char('0' + a[i].gia_tri);
+        }
         if(s.empty()) s = "0";
         return s;
     }
 };
 
-struct poly{
-    vector<int> a;
+struct dathuc{
+    vector<int> he_so;
 
-    poly(){
-        a = {0};
+    dathuc(){
+        he_so = {0};
     }
 
-    poly(vector<int> v){
-        a = v;
-        norm();
+    dathuc(vector<int> v){
+        he_so = v;
+        chuan_hoa();
     }
 
-    void norm(){
-        while(a.size() > 1 && a.back() == 0) a.pop_back();
-        if(a.empty()) a.pb(0);
+    void chuan_hoa(){
+        while(he_so.size() > 1 && he_so.back() == 0){
+            he_so.pop_back();
+        }
+        if(he_so.empty()) he_so.pb(0);
     }
 
-    bool zero() const{
-        return a.size() == 1 && a[0] == 0;
+    bool la_khong() const{
+        return he_so.size() == 1 && he_so[0] == 0;
     }
 
-    int deg() const{
-        if(zero()) return -1;
-        return (int)a.size() - 1;
+    int bac() const{
+        if(la_khong()) return -1;
+        return (int)he_so.size() - 1;
     }
 
-    int coef(int i) const{
-        if(i < 0 || i >= (int)a.size()) return 0;
-        return a[i];
+    int lay_he_so(int i) const{
+        if(i < 0 || i >= (int)he_so.size()) return 0;
+        return he_so[i];
     }
 
-    int weight() const{
-        int s = 0;
-        for(int x : a) s += x;
-        return s;
+    int trong_so() const{
+        int tong = 0;
+        for(int x : he_so) tong += x;
+        return tong;
     }
 
-    static poly frombin(string s){
+    static dathuc tu_chuoi_nhi_phan(string s){
         vector<int> v;
         for(int i = (int)s.size() - 1; i >= 0; i--){
-            if(s[i] == '0' || s[i] == '1') v.pb(s[i] - '0');
+            if(s[i] == '0' || s[i] == '1'){
+                v.pb(s[i] - '0');
+            }
         }
         if(v.empty()) v.pb(0);
-        return poly(v);
+        return dathuc(v);
     }
 
-    static poly frommask(unsigned long long m, int k){
+    static dathuc tu_mat_na(unsigned long long mat_na, int k){
         vector<int> v(max(1, k), 0);
-        for(int i = 0; i < k; i++) v[i] = (m >> i) & 1;
-        return poly(v);
+        for(int i = 0; i < k; i++){
+            v[i] = (mat_na >> i) & 1;
+        }
+        return dathuc(v);
     }
 
-    static poly xn1(int n){
+    static dathuc x_mu_n_cong_1(int n){
         vector<int> v(n + 1, 0);
         v[0] = 1;
         v[n] = 1;
-        return poly(v);
+        return dathuc(v);
     }
 
-    string bin(int len = -1) const{
-        int d = deg();
-        if(len != -1) d = len - 1;
+    string dang_nhi_phan(int do_dai = -1) const{
+        int d = bac();
+        if(do_dai != -1) d = do_dai - 1;
         if(d < 0) return "0";
+
         string s;
-        for(int i = d; i >= 0; i--) s += char('0' + coef(i));
+        for(int i = d; i >= 0; i--){
+            s += char('0' + lay_he_so(i));
+        }
         return s;
     }
 
-    string str() const{
-        if(zero()) return "0";
+    string dang_da_thuc() const{
+        if(la_khong()) return "0";
+
         string s;
-        for(int i = deg(); i >= 0; i--){
-            if(!coef(i)) continue;
+        for(int i = bac(); i >= 0; i--){
+            if(!lay_he_so(i)) continue;
+
             if(!s.empty()) s += "+";
+
             if(i == 0) s += "1";
             else if(i == 1) s += "x";
             else s += "x^" + to_string(i);
         }
+
         return s;
     }
 };
 
-poly operator+(poly x, poly y){
-    int n = max(x.a.size(), y.a.size());
+dathuc operator+(dathuc a, dathuc b){
+    int n = max(a.he_so.size(), b.he_so.size());
     vector<int> v(n, 0);
-    for(int i = 0; i < n; i++) v[i] = x.coef(i) ^ y.coef(i);
-    return poly(v);
+
+    for(int i = 0; i < n; i++){
+        v[i] = a.lay_he_so(i) ^ b.lay_he_so(i);
+    }
+
+    return dathuc(v);
 }
 
-poly operator*(poly x, poly y){
-    if(x.zero() || y.zero()) return poly();
-    vector<int> v(x.deg() + y.deg() + 1, 0);
-    for(int i = 0; i <= x.deg(); i++){
-        if(!x.coef(i)) continue;
-        for(int j = 0; j <= y.deg(); j++){
-            if(y.coef(j)) v[i + j] ^= 1;
+dathuc operator*(dathuc a, dathuc b){
+    if(a.la_khong() || b.la_khong()) return dathuc();
+
+    vector<int> v(a.bac() + b.bac() + 1, 0);
+
+    for(int i = 0; i <= a.bac(); i++){
+        if(!a.lay_he_so(i)) continue;
+
+        for(int j = 0; j <= b.bac(); j++){
+            if(b.lay_he_so(j)){
+                v[i + j] ^= 1;
+            }
         }
     }
-    return poly(v);
+
+    return dathuc(v);
 }
 
-pair<poly, poly> divmod(poly f, poly g){
-    if(g.zero()) return {poly(), f};
-    vector<int> q(max(1, f.deg() - g.deg() + 1), 0);
-    poly r = f;
-    while(!r.zero() && r.deg() >= g.deg()){
-        int sh = r.deg() - g.deg();
-        q[sh] ^= 1;
-        if((int)r.a.size() < sh + (int)g.a.size()) r.a.resize(sh + g.a.size(), 0);
-        for(int i = 0; i < (int)g.a.size(); i++) r.a[i + sh] ^= g.a[i];
-        r.norm();
+pair<dathuc, dathuc> chia_lay_du(dathuc f, dathuc g){
+    if(g.la_khong()) return {dathuc(), f};
+
+    vector<int> thuong(max(1, f.bac() - g.bac() + 1), 0);
+    dathuc du = f;
+
+    while(!du.la_khong() && du.bac() >= g.bac()){
+        int dich = du.bac() - g.bac();
+        thuong[dich] ^= 1;
+
+        if((int)du.he_so.size() < dich + (int)g.he_so.size()){
+            du.he_so.resize(dich + g.he_so.size(), 0);
+        }
+
+        for(int i = 0; i < (int)g.he_so.size(); i++){
+            du.he_so[i + dich] ^= g.he_so[i];
+        }
+
+        du.chuan_hoa();
     }
-    return {poly(q), r};
+
+    return {dathuc(thuong), du};
 }
 
-string word(poly p, int n){
-    return p.bin(n);
+string tu_ma(dathuc p, int n){
+    return p.dang_nhi_phan(n);
 }
 
 int main(){
     boost;
 
     int n, k;
-    string hs;
+    string chuoi_h;
+
     if(!(cin >> n >> k)) return 0;
-    cin >> hs;
+    cin >> chuoi_h;
 
-    poly h = poly::frombin(hs);
-    poly xn = poly::xn1(n);
-    auto qr = divmod(xn, h);
-    poly g = qr.fi;
-    poly rem = qr.se;
+    dathuc h = dathuc::tu_chuoi_nhi_phan(chuoi_h);
+    dathuc x_n_cong_1 = dathuc::x_mu_n_cong_1(n);
 
-    cout << "n = " << n << el;
-    cout << "k = " << k << el;
-    cout << "h(x) = " << h.str() << el;
+    auto ket_qua_chia = chia_lay_du(x_n_cong_1, h);
+    dathuc g = ket_qua_chia.fi;
+    dathuc du = ket_qua_chia.se;
 
-    if(!rem.zero()){
-        cout << "invalid" << el;
-        cout << "reason = h(x) does not divide x^n + 1" << el;
+    cout << "do_dai_ma = " << n << el;
+    cout << "so_bit_thong_tin = " << k << el;
+    cout << "h(x) = " << h.dang_da_thuc() << el;
+
+    if(!du.la_khong()){
+        cout << "khong_hop_le" << el;
+        cout << "ly_do = h(x) khong chia het x^n + 1" << el;
         return 0;
     }
 
-    cout << "g(x) = " << g.str() << el;
+    cout << "g(x) = " << g.dang_da_thuc() << el;
 
-    if(h.deg() != k){
-        cout << "warning = deg(h) != k" << el;
+    if(h.bac() != k){
+        cout << "canh_bao = bac cua h(x) khac k" << el;
     }
-    if(g.deg() != n - k){
-        cout << "warning = deg(g) != n - k" << el;
+
+    if(g.bac() != n - k){
+        cout << "canh_bao = bac cua g(x) khac n - k" << el;
     }
 
     if(k < 0 || k >= 63){
-        cout << "invalid" << el;
-        cout << "reason = k is too large for exhaustive search" << el;
+        cout << "khong_hop_le" << el;
+        cout << "ly_do = k qua lon" << el;
         return 0;
     }
 
     if(k > 25){
-        cout << "invalid" << el;
-        cout << "reason = k is too large for this exhaustive implementation" << el;
+        cout << "khong_hop_le" << el;
+        cout << "ly_do = k qua lon cho cach duyet toan bo tu ma" << el;
         return 0;
     }
 
-    int dmin = inf;
-    poly best;
-    unsigned long long lim = 1ULL << k;
+    int khoang_cach_nho_nhat = inf;
+    dathuc tu_ma_nho_nhat;
 
-    for(unsigned long long mask = 1; mask < lim; mask++){
-        poly m = poly::frommask(mask, k);
-        poly c = m * g;
-        int w = c.weight();
-        if(w < dmin){
-            dmin = w;
-            best = c;
+    unsigned long long gioi_han = 1ULL << k;
+
+    for(unsigned long long mat_na = 1; mat_na < gioi_han; mat_na++){
+        dathuc thong_diep = dathuc::tu_mat_na(mat_na, k);
+        dathuc ma = thong_diep * g;
+
+        int w = ma.trong_so();
+
+        if(w < khoang_cach_nho_nhat){
+            khoang_cach_nho_nhat = w;
+            tu_ma_nho_nhat = ma;
         }
     }
 
-    cout << "d_min = " << dmin << el;
-    cout << "detectable_errors = " << dmin - 1 << el;
-    cout << "correctable_errors = " << (dmin - 1) / 2 << el;
-    cout << "minimum_codeword = " << word(best, n) << el;
+    cout << "khoang_cach_ma_toi_thieu = " << khoang_cach_nho_nhat << el;
+    cout << "so_loi_phat_hien_duoc = " << khoang_cach_nho_nhat - 1 << el;
+    cout << "so_loi_sua_duoc = " << (khoang_cach_nho_nhat - 1) / 2 << el;
+    cout << "tu_ma_co_trong_so_nho_nhat = " << tu_ma(tu_ma_nho_nhat, n) << el;
 
     return 0;
 }
